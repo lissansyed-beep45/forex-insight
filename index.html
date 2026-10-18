@@ -19,6 +19,14 @@ button{background:#155343;border-color:#267b69;font-weight:750;cursor:pointer}
 ul{padding-left:19px;margin-bottom:0}li{margin:7px 0}.green{color:var(--green)}.warn{color:#f3c96b}.hidden{display:none}
 a{color:var(--blue)}.foot{font-size:12px;color:var(--muted);padding:4px 2px 22px}
 @media(max-width:480px){.chart{height:460px}.tiles{grid-template-columns:1fr 1fr}.tile:last-child{grid-column:1/-1}main{padding:10px}.panel{padding:12px}}
+
+.signal-status{border:1px solid var(--line);border-radius:12px;padding:14px;background:#0b1320;margin-top:12px}
+.signal-status strong{font-size:20px;display:block;margin-bottom:4px}
+.status-wait{color:#f3c96b}.status-buy{color:#35d6a2}.status-sell{color:#ff8d8d}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.checkrow{display:flex;align-items:flex-start;gap:9px;margin:10px 0;color:var(--text);font-size:13px}.checkrow input{width:18px;min-height:18px;margin:2px 0 0;flex:0 0 18px;accent-color:var(--green)}
+.smallprint{font-size:12px;color:var(--muted)}.riskbox{background:#241d10;border:1px solid #6d5524;color:#ffe0a0;padding:12px;border-radius:10px;margin-top:10px}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -50,9 +58,41 @@ a{color:var(--blue)}.foot{font-size:12px;color:var(--muted);padding:4px 2px 22px
   <div class="note">Chart data is provided by TradingView and may differ from your MT5 broker's quotes. Internet access is required.</div>
 </section>
 
+
+<section class="panel" id="signalPanel">
+  <h2>Rule-based setup checker</h2>
+  <p class="sub">Enter the indicator readings you see on the chart. This tool checks a simple educational rule set; it does not read TradingView data automatically and is not a prediction.</p>
+  <div class="form-grid">
+    <div><label for="trendInput">Trend from EMA 20 / EMA 50</label><select id="trendInput"><option value="bull">Bullish: price &gt; EMA 20 &gt; EMA 50</option><option value="bear">Bearish: price &lt; EMA 20 &lt; EMA 50</option><option value="mixed" selected>Mixed / unclear</option></select></div>
+    <div><label for="rsiInput">RSI 14 (0–100)</label><input id="rsiInput" type="number" min="0" max="100" step="0.1" placeholder="e.g. 56"></div>
+    <div><label for="macdInput">MACD vs signal line</label><select id="macdInput"><option value="bull">MACD above signal (bullish)</option><option value="bear">MACD below signal (bearish)</option><option value="mixed" selected>Crossed / unclear</option></select></div>
+    <div><label for="candleInput">Last candle close</label><select id="candleInput"><option value="no" selected>No confirmed breakout / close</option><option value="bull">Closed with bullish confirmation</option><option value="bear">Closed with bearish confirmation</option></select></div>
+  </div>
+  <div style="height:12px"></div>
+  <button id="checkSignal">Check setup</button>
+  <div id="signalResult" class="signal-status" aria-live="polite"><strong class="status-wait">WAIT — not checked yet</strong><span>Enter the values you observe, then tap Check setup.</span></div>
+  <div class="note">Rules: a possible bullish setup requires bullish EMA structure, RSI 50–69.9, bullish MACD, and a bullish candle close. A possible bearish setup requires bearish EMA structure, RSI 30.1–49.9, bearish MACD, and a bearish candle close. Everything else returns WAIT.</div>
+</section>
+
+<section class="panel">
+  <h2>Risk budget calculator</h2>
+  <p class="sub">Calculate a maximum planned loss amount only. This does not calculate position size or guarantee the actual loss will stay within the limit.</p>
+  <div class="form-grid">
+    <div><label for="accountSize">Account balance (in your account currency)</label><input id="accountSize" type="number" min="0" step="any" placeholder="e.g. 1000"></div>
+    <div><label for="riskPercent">Risk limit per idea (%)</label><input id="riskPercent" type="number" min="0" max="100" step="0.1" value="1"></div>
+  </div>
+  <div style="height:10px"></div>
+  <button id="calcRisk">Calculate risk budget</button>
+  <div id="riskResult" class="signal-status" aria-live="polite"><strong>Planned loss limit: —</strong><span>Enter your balance and risk percentage.</span></div>
+  <label class="checkrow"><input id="stopCheck" type="checkbox"> I have identified a logical stop-loss / invalidation level.</label>
+  <label class="checkrow"><input id="newsCheck" type="checkbox"> I checked for major news and understand slippage can occur.</label>
+  <label class="checkrow"><input id="spreadCheck" type="checkbox"> I checked spread, fees, and whether the market conditions are suitable.</label>
+  <div id="riskGate" class="riskbox">Risk gate: incomplete. Review all three checks before considering any setup.</div>
+</section>
+
 <section class="panel">
   <h2>Technical analysis checklist</h2>
-  <p class="sub">Use these checks alongside the chart. This free version does not automatically read the chart or create guaranteed signals.</p>
+  <p class="sub">Use these checks alongside the rule-based setup checker. Indicator values must be read and entered manually; no signal is guaranteed.</p>
   <div class="tiles">
     <div class="tile"><span>Trend</span><b>EMA 20 / 50</b></div>
     <div class="tile"><span>Momentum</span><b>RSI 14</b></div>
@@ -89,7 +129,7 @@ a{color:var(--blue)}.foot{font-size:12px;color:var(--muted);padding:4px 2px 22px
   <p>A true live feed from your MT5 broker requires a running MT5 terminal or a broker-supported data bridge, usually on a Windows computer/VPS. A phone-only free setup cannot run the project's Windows MT5 connector.</p>
   <p class="sub">This version is a free, browser-based alternative—not a direct MT5 connection. It does not place trades.</p>
 </section>
-<div class="foot">Educational use only. Forex trading is risky. Indicators can be wrong and do not guarantee profit.</div>
+<div class="foot">Educational use only. The setup checker uses manually entered values, not automated market data. Forex/CFD trading is risky; indicators can be wrong, losses can exceed planned amounts, and no signal guarantees profit. This page does not place trades.</div>
 </main>
 <script>
 function loadChart(){
@@ -113,6 +153,50 @@ function loadChart(){
   });
   container.appendChild(script);
 }
+
+function updateSignal(){
+ const trend=document.getElementById('trendInput').value;
+ const rsiRaw=document.getElementById('rsiInput').value;
+ const rsi=Number(rsiRaw);
+ const macd=document.getElementById('macdInput').value;
+ const candle=document.getElementById('candleInput').value;
+ const out=document.getElementById('signalResult');
+ let title='WAIT — no complete setup', cls='status-wait';
+ let details=[];
+ if(rsiRaw==='' || !Number.isFinite(rsi) || rsi<0 || rsi>100){
+   title='WAIT — enter a valid RSI'; details.push('Enter the RSI 14 value visible on your chart (0–100).');
+ } else {
+   const buy=trend==='bull' && rsi>=50 && rsi<70 && macd==='bull' && candle==='bull';
+   const sell=trend==='bear' && rsi>30 && rsi<=50 && macd==='bear' && candle==='bear';
+   if(buy){title='POSSIBLE BUY SETUP — not a trade instruction';cls='status-buy';details.push('The entered trend, RSI, MACD, and candle-close conditions align bullishly.');}
+   else if(sell){title='POSSIBLE SELL SETUP — not a trade instruction';cls='status-sell';details.push('The entered trend, RSI, MACD, and candle-close conditions align bearishly.');}
+   else {details.push('One or more conditions do not align. Waiting is the rule-based result.');}
+   if(rsi>=70)details.push('RSI is 70 or higher: bullish momentum may be stretched; avoid treating this as an automatic entry.');
+   if(rsi<=30)details.push('RSI is 30 or lower: bearish momentum may be stretched; avoid treating this as an automatic entry.');
+   if(trend==='mixed'||macd==='mixed')details.push('Trend or MACD is unclear, so confirmation is missing.');
+   if(candle==='no')details.push('Wait for a confirmed candle close; do not infer confirmation from a candle still forming.');
+ }
+ out.innerHTML='<strong class="'+cls+'"></strong><span></span>';
+ out.querySelector('strong').textContent=title;
+ out.querySelector('span').textContent=details.join(' ');
+}
+document.getElementById('checkSignal').addEventListener('click',updateSignal);
+document.getElementById('calcRisk').addEventListener('click',()=>{
+ const bal=Number(document.getElementById('accountSize').value), pct=Number(document.getElementById('riskPercent').value), out=document.getElementById('riskResult');
+ if(!Number.isFinite(bal)||!Number.isFinite(pct)||bal<=0||pct<=0||pct>100){out.innerHTML='<strong>Enter valid values</strong><span>Balance must be above zero and risk percentage must be greater than zero and no more than 100.</span>';return;}
+ const amount=bal*pct/100;
+ out.innerHTML='<strong></strong><span></span>';
+ out.querySelector('strong').textContent='Planned loss limit: '+amount.toLocaleString(undefined,{maximumFractionDigits:2})+' ('+pct+'% of balance)';
+ out.querySelector('span').textContent='Use your account currency. Actual losses can exceed this because of slippage, gaps, fees, or execution differences.';
+});
+function updateRiskGate(){
+ const ok=['stopCheck','newsCheck','spreadCheck'].every(id=>document.getElementById(id).checked);
+ const el=document.getElementById('riskGate');
+ el.textContent=ok?'Risk gate: all checklist items marked. This is not a guarantee of safety or profitability.':'Risk gate: incomplete. Review all three checks before considering any setup.';
+ el.style.borderColor=ok?'#267b69':'#6d5524';
+}
+['stopCheck','newsCheck','spreadCheck'].forEach(id=>document.getElementById(id).addEventListener('change',updateRiskGate));
+
 document.getElementById('load').addEventListener('click',loadChart);
 document.getElementById('pair').addEventListener('change',loadChart);
 document.getElementById('tf').addEventListener('change',loadChart);
