@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080d16">
+<title>Forex Insight — Mobile Chart Analysis</title>
+<style>
+:root{color-scheme:dark;--bg:#080d16;--panel:#111a28;--line:#26364c;--text:#edf3fc;--muted:#98a9c0;--green:#35d6a2;--blue:#80adff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{padding:18px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#080d16f2;backdrop-filter:blur(12px);z-index:5}
+.brand{font-size:20px;font-weight:850;letter-spacing:.4px}.brand span{color:var(--green)}.sub{font-size:12px;color:var(--muted)}
+main{max-width:1000px;margin:auto;padding:14px;display:grid;gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+h2{font-size:16px;margin:0 0 12px}label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
+select,input,button{width:100%;border:1px solid #33465f;border-radius:9px;background:#0b1320;color:var(--text);padding:12px;font:inherit;min-height:44px}
+button{background:#155343;border-color:#267b69;font-weight:750;cursor:pointer}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.chart{height:510px;overflow:hidden;border-radius:10px}.note{font-size:12px;color:var(--muted);margin-top:10px}
+#analysis{white-space:pre-wrap;color:#d8e4f5}.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.tile{background:#0b1320;border:1px solid var(--line);padding:10px;border-radius:10px}.tile b{display:block;font-size:14px}.tile span{font-size:11px;color:var(--muted)}
+ul{padding-left:19px;margin-bottom:0}li{margin:7px 0}.green{color:var(--green)}.warn{color:#f3c96b}.hidden{display:none}
+a{color:var(--blue)}.foot{font-size:12px;color:var(--muted);padding:4px 2px 22px}
+@media(max-width:480px){.chart{height:460px}.tiles{grid-template-columns:1fr 1fr}.tile:last-child{grid-column:1/-1}main{padding:10px}.panel{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">FOREX <span>INSIGHT</span></div>
+  <div class="sub">Free mobile chart dashboard · works from Android browser</div>
+</header>
+<main>
+<section class="panel">
+  <h2>Live chart</h2>
+  <div class="row">
+    <div><label for="pair">Forex pair</label><select id="pair">
+      <option value="FX:EURUSD">EUR/USD</option><option value="FX:GBPUSD">GBP/USD</option>
+      <option value="FX:USDJPY">USD/JPY</option><option value="FX:AUDUSD">AUD/USD</option>
+      <option value="FX:USDCAD">USD/CAD</option><option value="FX:USDCHF">USD/CHF</option>
+      <option value="FX:NZDUSD">NZD/USD</option><option value="FX:EURJPY">EUR/JPY</option>
+      <option value="FX:GBPJPY">GBP/JPY</option>
+    </select></div>
+    <div><label for="tf">Timeframe</label><select id="tf">
+      <option value="5">5 minutes</option><option value="15" selected>15 minutes</option>
+      <option value="30">30 minutes</option><option value="60">1 hour</option>
+      <option value="240">4 hours</option><option value="D">1 day</option>
+    </select></div>
+  </div>
+  <div style="height:10px"></div>
+  <button id="load">Load selected chart</button>
+  <div style="height:12px"></div>
+  <div id="chart" class="chart"></div>
+  <div class="note">Chart data is provided by TradingView and may differ from your MT5 broker's quotes. Internet access is required.</div>
+</section>
+
+<section class="panel">
+  <h2>Technical analysis checklist</h2>
+  <p class="sub">Use these checks alongside the chart. This free version does not automatically read the chart or create guaranteed signals.</p>
+  <div class="tiles">
+    <div class="tile"><span>Trend</span><b>EMA 20 / 50</b></div>
+    <div class="tile"><span>Momentum</span><b>RSI 14</b></div>
+    <div class="tile"><span>Confirmation</span><b>MACD</b></div>
+  </div>
+  <ul>
+    <li><b>Trend:</b> Is price above or below EMA 20 and EMA 50? Are the averages sloping clearly?</li>
+    <li><b>RSI:</b> Above 50 can indicate stronger upward momentum; below 50 can indicate stronger downward momentum. Above 70 or below 30 can mean momentum is stretched, not an automatic trade.</li>
+    <li><b>MACD:</b> Check whether the MACD line is above or below its signal line and whether that agrees with the trend.</li>
+    <li><b>Levels:</b> Mark recent swing highs/lows and wait for a candle close before judging a breakout.</li>
+    <li><b>Risk:</b> Decide in advance where the idea is invalidated. Avoid trading money you cannot afford to lose.</li>
+  </ul>
+  <div style="height:12px"></div>
+  <button id="notesToggle">Open my analysis notes</button>
+  <div id="notesArea" class="hidden" style="margin-top:12px">
+    <label for="notes">Write your own chart notes (saved only in this page while it remains open)</label>
+    <textarea id="notes" rows="5" style="width:100%;border-radius:9px;padding:10px;background:#0b1320;color:var(--text);border:1px solid #33465f" placeholder="Trend, support/resistance, candle close, what would invalidate the idea..."></textarea>
+    <p class="note">Notes are not sent to a server and may disappear when you close or reload the page.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Analyze an MT5 screenshot</h2>
+  <p class="sub">Take a screenshot in the MT5 Android app and select it here. This preview helps you inspect it; it does not automatically extract prices or generate AI signals.</p>
+  <label for="imageUpload">Choose chart screenshot</label>
+  <input id="imageUpload" type="file" accept="image/*">
+  <div id="previewWrap" class="hidden" style="margin-top:12px">
+    <img id="preview" alt="Selected chart screenshot" style="width:100%;height:auto;border-radius:10px">
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Want the real MT5 feed?</h2>
+  <p>A true live feed from your MT5 broker requires a running MT5 terminal or a broker-supported data bridge, usually on a Windows computer/VPS. A phone-only free setup cannot run the project's Windows MT5 connector.</p>
+  <p class="sub">This version is a free, browser-based alternative—not a direct MT5 connection. It does not place trades.</p>
+</section>
+<div class="foot">Educational use only. Forex trading is risky. Indicators can be wrong and do not guarantee profit.</div>
+</main>
+<script>
+function loadChart(){
+  const symbol=document.getElementById('pair').value;
+  const interval=document.getElementById('tf').value;
+  const host=document.getElementById('chart');
+  host.innerHTML='';
+  const container=document.createElement('div');
+  container.style.height='100%';container.style.width='100%';
+  host.appendChild(container);
+  const script=document.createElement('script');
+  script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+  script.async=true;
+  script.innerHTML=JSON.stringify({
+    autosize:true,symbol:symbol,interval:interval,timezone:'Etc/UTC',theme:'dark',
+    style:'1',locale:'en',allow_symbol_change:true,calendar:false,
+    support_host:'https://www.tradingview.com',
+    withdateranges:true,hide_side_toolbar:false,details:false,hotlist:false,
+    studies:['STD;EMA','STD;RSI','STD;MACD'],
+    backgroundColor:'#111a28',gridColor:'#1b293c'
+  });
+  container.appendChild(script);
+}
+document.getElementById('load').addEventListener('click',loadChart);
+document.getElementById('pair').addEventListener('change',loadChart);
+document.getElementById('tf').addEventListener('change',loadChart);
+document.getElementById('notesToggle').addEventListener('click',()=>{
+ const el=document.getElementById('notesArea');el.classList.toggle('hidden');
+ document.getElementById('notesToggle').textContent=el.classList.contains('hidden')?'Open my analysis notes':'Hide my analysis notes';
+});
+document.getElementById('imageUpload').addEventListener('change',e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ const url=URL.createObjectURL(file);document.getElementById('preview').src=url;
+ document.getElementById('previewWrap').classList.remove('hidden');
+});
+loadChart();
+</script>
+</body></html>
